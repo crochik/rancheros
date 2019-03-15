@@ -13,6 +13,23 @@ ISO=${ARTIFACTS}/$(echo ${DISTRIB_ID} | tr '[:upper:]' '[:lower:]').iso
 mkdir -p ${CD}/boot/isolinux
 mkdir -p ${CD}/rancheros
 
+#####
+extra_user_images="
+portainer/portainer:latest
+"
+
+for image in ${extra_system_images} ${extra_user_images}; do
+  if ! docker inspect ${image} > /dev/null 2>&1; then
+    docker pull ${image}
+  fi
+done
+
+mkdir -p ${CD}/images
+docker save ${extra_user_images} | gzip > ${CD}/images/extra_user_images.tar.gz
+wget http://www.crochik.com/tldr/rancheros/cloud-config.yml -o ${CD}/cloud-config.yml
+#####
+
+
 cp ${ARTIFACTS}/${INITRD}                     ${CD}/boot
 
 # TODO: these move to os-kernel
